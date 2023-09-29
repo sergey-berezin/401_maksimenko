@@ -54,7 +54,7 @@ namespace ConsoleApp1
                             {
                                 HttpResponseMessage response = await client.GetAsync(modelUrl, HttpCompletionOption.ResponseHeadersRead);
                                 response.EnsureSuccessStatusCode();
-                                
+
                                 using (Stream contentStream = await response.Content.ReadAsStreamAsync(),
                                               fileStream = new FileStream(ModelPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, true))
                                 {
@@ -76,7 +76,7 @@ namespace ConsoleApp1
                         {
                             retries++;
                         }
-                    
+
                     }
                     if (!downloaded)
                     {
@@ -150,10 +150,11 @@ namespace ConsoleApp1
                     var answer = String.Join(" ", predictedTokens);
                     cancel.ThrowIfCancellationRequested();
                     return answer;
-                } catch (Exception ex) { return ex.Message; }
+                }
+                catch (Exception ex) { return ex.Message; }
             });
         }
-       
+
         public static Tensor<long> ConvertToTensor(long[] inputArray, int inputDimension)
         {
             // Create a tensor with the shape the model is expecting. Here we are sending in 1 batch with the inputDimension as the amount of tokens.
