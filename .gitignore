@@ -7,8 +7,10 @@
 *.sln.docstates
 
 # VS Code
-.vscode/
+
 .vs/
+.vscode/
+
 
 # Build results
 
