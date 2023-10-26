@@ -8,6 +8,7 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using static System.Collections.Specialized.BitVector32;
+
 namespace ConsoleApp1
 {
     public class NuGetBert
@@ -19,11 +20,15 @@ namespace ConsoleApp1
         }
         public static string ModelPath;
         CancellationToken cancel;
-        public async Task download()
+        private static InferenceSession session;
+        
+        public async Task Download()
         {
+            
             try
             {
                 await DownloadModelFileAsync();
+                session = new InferenceSession(ModelPath);
             }
             catch
             {
@@ -86,7 +91,7 @@ namespace ConsoleApp1
                 }
             });
         }
-        public Task<string> TokenizeText(string sentence)
+        public Task<string> AnswerBert(string sentence)
         {
             return Task.Factory.StartNew(() =>
             {
@@ -122,11 +127,12 @@ namespace ConsoleApp1
                         NamedOnnxValue.CreateFromTensor("segment_ids", token_type_ids) };
 
                     // Create an InferenceSession from the Model Path.
-                    var session = new InferenceSession(ModelPath);
-
-                    // Run session and send the input data in to get inference output. 
-                    var output = session.Run(input);
-
+                    IReadOnlyList<NamedOnnxValue>? output;
+                    lock (session)
+                    {
+                        // Run session and send the input data in to get inference output. 
+                        output = session.Run(input);
+                    }
                     // Call ToList on the output.
                     // Get the First and Last item in the list.
                     // Get the Value of the item and cast as IEnumerable<float> to get a list result.
@@ -151,8 +157,8 @@ namespace ConsoleApp1
                     cancel.ThrowIfCancellationRequested();
                     return answer;
                 }
-                catch (Exception ex) { return ex.Message; }
-            });
+                catch (Exception ex) { throw ex; }
+            }, TaskCreationOptions.LongRunning);
         }
 
         public static Tensor<long> ConvertToTensor(long[] inputArray, int inputDimension)

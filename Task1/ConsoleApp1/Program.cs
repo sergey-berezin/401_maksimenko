@@ -1,24 +1,27 @@
 ﻿using ConsoleApp1;
- 
 
 namespace MyApp 
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var hobbit = File.ReadAllText(args[0]);
             string modelFilePath = "bert-large-uncased-whole-word-masking-finetuned-squad.onnx";
-            Task result = Process(modelFilePath, hobbit);
+            Task result = ProcessAsync(modelFilePath, hobbit);
+            await result;
+
         }
 
-        static async Task Process(string modelFilePath, string hobbit)
+        static async Task ProcessAsync(string modelFilePath, string hobbit)
         {
             var ct = new CancellationTokenSource();
             var cancel = ct.Token;
             var nugetResult = new NuGetBert(modelFilePath, cancel);
             var tasks = new List<Task>();
-            var download_res = nugetResult.download();
+            var download_res = nugetResult.Download();
+            
+
             
             while (!cancel.IsCancellationRequested)
             {
@@ -28,7 +31,7 @@ namespace MyApp
                     ct.Cancel();
                 var sentence = $"{{\"question\": {question}, \"context\": \"@CTX\"}}".Replace("@CTX", hobbit);
                 //Console.WriteLine(question);
-                var task = nugetResult.TokenizeText(sentence).ContinueWith(t =>
+                var task = nugetResult.AnswerBert(sentence).ContinueWith(t =>
                 {
                     Console.WriteLine(t.Result);
                 });
