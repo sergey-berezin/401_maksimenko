@@ -34,7 +34,7 @@ namespace MyApp
                 var task = nugetResult.AnswerBert(sentence).ContinueWith(t =>
                 {
                     Console.WriteLine(t.Result);
-                });
+                }, TaskScheduler.FromCurrentSynchronizationContext());
                 tasks.Add(task);
 
             }
