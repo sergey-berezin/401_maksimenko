@@ -17,6 +17,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="BERTTokenizers" Version="1.2.0" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.16.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="NuGetBert">
       <HintPath>..\..\NuGetBert\NuGetBert\bin\Debug\net6.0\NuGetBert.dll</HintPath>
     </Reference>

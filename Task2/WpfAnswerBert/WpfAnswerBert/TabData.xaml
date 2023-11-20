@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfAnswerBert"
-        mc:Ignorable="d">
+        mc:Ignorable="d" Width="703">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="108*"/>
@@ -21,10 +21,11 @@
                     <TextBlock x:Name="TextBlock" TextWrapping="Wrap"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Margin="0,10,0,0">
-                    <TextBox x:Name ="QuestionBox" Text="" KeyDown="QueryBox_KeyDown"/>
-                
-                    <TextBlock Name="TextBlockAnswer" TextWrapping="Wrap" HorizontalAlignment="Left" Width="1164" Height="120" Grid.Column="1" Grid.Row="1"/>
-                    <Button x:Name ="CancelBtn" Content="Cancel" Width="87" Click="StopButton_Click"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBox x:Name ="QuestionBox" Text="" KeyDown="QueryBox_KeyDown" Width="143" Height="27"/>
+                        <Button x:Name ="CancelBtn" Content="Cancel" Width="88" Click="StopButton_Click" Height="27"/>
+                    </StackPanel>
+                    <TextBlock Name="TextBlockAnswer" TextWrapping="Wrap" Width="230" Height="120" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right"/>
                 </StackPanel>
             </Grid>
         </DockPanel>

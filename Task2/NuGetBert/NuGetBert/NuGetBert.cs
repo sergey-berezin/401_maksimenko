@@ -8,8 +8,9 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using static System.Collections.Specialized.BitVector32;
+using System.Windows;
 
-namespace ConsoleApp1
+namespace NuGetBertSpace
 {
     public class NuGetBert
     {
@@ -24,15 +25,15 @@ namespace ConsoleApp1
 
         public async Task Download()
         {
-
+            
             try
             {
                 await DownloadModelFileAsync();
                 session = new InferenceSession(ModelPath);
             }
-            catch
+            catch (Exception ex)
             {
-                Console.WriteLine("Download error, try later ^_^");
+                throw new Exception("DownloadModelFileAsync", ex);
             }
         }
 
@@ -70,7 +71,7 @@ namespace ConsoleApp1
                                         bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length);
                                         await fileStream.WriteAsync(buffer, 0, bytesRead);
                                         totalBytesRead += bytesRead;
-                                        Console.WriteLine($"Downloaded {totalBytesRead} bytes.");
+                                        //Console.WriteLine($"Downloaded {totalBytesRead} bytes.");
 
                                     } while (bytesRead > 0);
                                 }
@@ -87,16 +88,19 @@ namespace ConsoleApp1
                     {
                         throw new Exception($"Failed to download data from {modelUrl} after {retryCount} retries.");
                     }
-                    Console.WriteLine($"Downloaded {totalBytesRead} bytes.");
+                    //Console.WriteLine($"Downloaded {totalBytesRead} bytes.");
                 }
             });
         }
-        public async Task<string> AnswerBert(string sentence, CancellationToken token)
+        public async Task<string> AnswerBert(string sentence, CancellationToken cancelToken)
         {
-            return await Task.Factory.StartNew(() =>
+            return await Task<string>.Factory.StartNew(() =>
             {
                 try
                 {
+                    cancel = cancelToken;
+                    cancel.ThrowIfCancellationRequested();
+
                     // Create Tokenizer and tokenize the sentence.
                     var tokenizer = new BertUncasedLargeTokenizer();
 
@@ -133,6 +137,8 @@ namespace ConsoleApp1
                         // Run session and send the input data in to get inference output. 
                         output = session.Run(input);
                     }
+                    cancelToken.ThrowIfCancellationRequested();
+
                     // Call ToList on the output.
                     // Get the First and Last item in the list.
                     // Get the Value of the item and cast as IEnumerable<float> to get a list result.
@@ -157,8 +163,8 @@ namespace ConsoleApp1
                     cancel.ThrowIfCancellationRequested();
                     return answer;
                 }
-                catch (Exception ex) { throw ex; }
-            }, token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+                catch (Exception ex) { throw new Exception($"AnswerBert: {ex}"); }
+            }, cancel, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
 
         public static Tensor<long> ConvertToTensor(long[] inputArray, int inputDimension)

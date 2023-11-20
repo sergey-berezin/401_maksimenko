@@ -14,7 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using ConsoleApp1;
+using NuGetBertSpace;
 namespace WpfAnswerBert
 {
     /// <summary>
@@ -23,14 +23,22 @@ namespace WpfAnswerBert
     public partial class MainWindow : Window
     {
         int tabNum = 0;
-        string modelPath = "bert-large-uncased-whole-word-masking-finetuned-squad.onnx";
+        string modelPath = "D:\\Березин1\\Task2\\WpfAnswerBert\\WpfAnswerBert\\bert-large-uncased-whole-word-masking-finetuned-squad.onnx";
         NuGetBert answerTask;
         public MainWindow()
         {
             InitializeComponent();
             CancellationTokenSource cancel = new CancellationTokenSource();
             answerTask = new NuGetBert(modelPath, cancel.Token);
-            //var download_res = answerTask.Download();
+            try
+            {
+                _ = answerTask.Download();
+                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"MainWindow: An error occurred: {ex.Message}");
+            }
             CreateNewTabElem(answerTask, cancel);
         }
         private void AddNewTab(string header, object content)

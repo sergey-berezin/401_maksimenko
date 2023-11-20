@@ -1,26 +1,14 @@
-﻿using ConsoleApp1;
-using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿using WpfAnswerBert;
+
 using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
 using System.IO;
-using System.Threading.Channels;
-using System.Diagnostics.Metrics;
-using static System.Net.Mime.MediaTypeNames;
-using System.Collections;
-using System.Reflection.Metadata;
+using System.Threading;
+using System.Windows.Controls;
+using System.Windows;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using System;
+using NuGetBertSpace;
 
 namespace WpfAnswerBert
 {
@@ -32,6 +20,7 @@ namespace WpfAnswerBert
         public TabData(NuGetBert bertComponent, CancellationTokenSource tokenSource)
         {
             InitializeComponent();
+            TextBlockAnswer.Text = "Здесь будет ответ";
             BertComponent = bertComponent;
             TokenSource = tokenSource;
             CancelBtn.IsEnabled = false;
@@ -40,7 +29,7 @@ namespace WpfAnswerBert
         private string selectedFilePath;
         private string answer;
         CancellationTokenSource TokenSource;
-        NuGetBert BertComponent;
+        NuGetBertSpace.NuGetBert BertComponent;
         private void LoadFileBtn_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog
@@ -58,7 +47,7 @@ namespace WpfAnswerBert
         {
             TokenSource.Cancel();
         }
-        private async void QueryBox_KeyDown(object sender, KeyEventArgs e)
+        public async void QueryBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
@@ -75,21 +64,18 @@ namespace WpfAnswerBert
                 }
                 else
                 {
-                    string sentence = $"{{\"question\": {question}, \"context\": \"@CTX\"}}".Replace("@CTX", hobbit);
-                    var task = BertComponent.AnswerBert(sentence, TokenSource.Token).ContinueWith(t =>
+                    var sentence = $"{{\"question\": \"{question}\", \"context\": \"{hobbit}\"}}";
+                    try
                     {
-                        if (t.IsFaulted)
-                        {
-                            // Обработка исключения, если оно возникло
-                            MessageBox.Show(t.Exception.Message);
-                        }
-                        else
-                        {
-                            // Устанавливаем текст в TextBlockAnswer
-                            TextBlockAnswer.Text = t.Result;
-                        }
-                    }, TaskScheduler.FromCurrentSynchronizationContext());
+                        var task = await BertComponent.AnswerBert(sentence, TokenSource.Token);
+                        
+                        TextBlockAnswer.Text = task;
 
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"QueryBox_KeyDown: An error occurred: {ex.Message}");
+                    }
                     CancelBtn.IsEnabled = false;
                 }
             }
