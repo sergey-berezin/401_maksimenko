@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Text, Questions and Answers</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <script>
+        function InputFile() {
+            let text = document.getElementById("load").files[0]
+            let reader = new FileReader()
+            reader.onload = async function () {
+                let res = reader.result
+                document.getElementById("textInput").value = res
+
+            }
+            reader.readAsText(text)
+        }
+    </script>
+    <h1>Bert App</h1>
+
+
+    <input id="load" onchange="InputFile()" type="file" />
+    <br><br>
+    <textarea id="textInput" rows="25" cols="100" placeholder="Enter text..."></textarea>
+    <br><br>
+    <div id="questions"></div>
+    <button onclick="addQuestion()">add question</button>
+    <div id="loader" class="loader"></div>
+    <br><br>
+    <button onclick="submitQuestions()">get answers</button>
+
+    <script>
+        var questionCounter = 0;
+        //Загрузка содержимого файла
+        //text = document.getElementById("textInput").value;
+
+        function addQuestion() {
+            questionCounter++;
+            var questionDiv = document.createElement('fieldset');
+            questionDiv.classList.add('questionDiv');
+            var questionLabel = document.createElement('label');
+            questionLabel.innerHTML = questionCounter + ') ';
+            var questionInput = document.createElement('input');
+            questionInput.classList.add('questionInput');
+            questionInput.type = 'text';
+            questionInput.id = 'question' + questionCounter;
+            questionInput.placeholder = 'Enter a question...';
+            questionDiv.appendChild(questionLabel);
+            questionDiv.appendChild(questionInput);
+            var answerLabel = document.createElement('label');
+            answerLabel.innerHTML = 'ans ' + ': ';
+            var answerInput = document.createElement('input');
+            answerInput.classList.add('answerInput');
+            answerInput.type = 'text';
+            answerInput.id = 'ans' + questionCounter;
+            answerInput.placeholder = '...';
+            answerInput.setAttribute('readonly', true);
+            questionDiv.appendChild(answerLabel);
+            questionDiv.appendChild(answerInput);
+            document.getElementById('questions').appendChild(questionDiv);
+        }
+        //questionsAndAnswerIds
+        //answerIdAndvalue
+        async function submitQuestions() {
+
+            document.getElementById('loader').style.display = 'block';
+            var text = document.getElementById('textInput').value;
+            if (!text === 0) {
+                alert("Please enter text.");
+                return;
+            }
+            var questionArray = document.getElementById('questions').querySelectorAll('[id^="question"]');
+            var answersArray = document.getElementById('questions').querySelectorAll('[id^="ans"]');
+            var QuestionsId = [];
+
+            questionArray.forEach(function (question, i) {
+                let QId = {
+                    question: question.value,
+                    answerId: answersArray[i].id
+                };
+                QuestionsId.push(QId);
+            });
+
+            var requestBody = {
+                text: text,
+                QuestionsId: QuestionsId
+            };
+
+            var jsonRequestBody = JSON.stringify(requestBody);
+            console.log(jsonRequestBody);
+            try {
+                let response = await fetch('https://localhost:7028/api/textQuestionAnswerer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8',
+                    },
+                    body: jsonRequestBody
+                })
+                document.getElementById('loader').style.display = 'none';
+                if (response.ok) {
+                    let result = await response.json();
+                    result.forEach(function (item) {
+                        var answerInput = document.getElementById(item.answerId)
+                        answerInput.setAttribute('value', item.answer)
+                    })
+                }
+            }
+            catch (e) {
+                document.getElementById('loader').style.display = 'none';
+                console.log(e);
+                alert("Server error: " + e);
+            }
+        }
+    </script>
+</body>
+</html>
