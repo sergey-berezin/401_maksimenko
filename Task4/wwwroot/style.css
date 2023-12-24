@@ -1,0 +1,38 @@
+﻿
+.questionDiv {
+    margin-bottom: 10px;
+}
+.questionInput {
+    width: 200px;
+    margin-right: 30px;
+} 
+.answerInput {
+    width: 320px;
+    margin-right: 20px;
+}
+:root {
+    color-scheme: light dark;
+}
+
+
+.loader {
+    width: 100%; /* Ширина элемента */
+    height: 20px; /* Высота элемента */
+    top: 0%; /* Положение по вертикали */
+    left: 0%; /* Положение по горизонтали */
+    overflow: hidden; /* Скрытие лишней части полосы */
+    background-color: #8A2BE2; /* Цвет фона полосы */
+    animation: fill 2s linear infinite;
+    display: none;
+}
+
+@keyframes fill {
+    0% {
+        width: 0;
+    }
+
+    100% {
+        width: 100;
+    }
+}
+
